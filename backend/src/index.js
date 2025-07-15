@@ -5,7 +5,7 @@ import { connectDB } from './lib/db.js';
 import cookieParser from "cookie-parser";
 import messageRoutes from "./routes/message.routes.js"
 import groupRoutes from "./routes/group.routes.js"
-import { authLimiter, messageLimiter, generalLimiter } from './lib/rateLimiters.js';
+import { authLimiter, messageLimiter} from './lib/rateLimiters.js';
 import cors from "cors";
 import {app,server,io} from './lib/socket.js'
 import path from "path";
@@ -26,7 +26,6 @@ app.use(cors({
     credentials:true,
 }))
 
-app.use(generalLimiter); 
 app.use("/api/auth", authLimiter, authRoutes) 
 app.use("/api/messages", messageRoutes)
 app.use("/api/messages/send", messageLimiter)
