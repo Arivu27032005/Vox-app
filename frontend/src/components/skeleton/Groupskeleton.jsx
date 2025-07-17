@@ -6,7 +6,7 @@ const GroupMessageSkeleton = () => {
     return (
         <div className='flex-1 overflow-y-auto p-4 space-y-4'>
             {skeletonMessages.map((_, idx) => {
-                // Alternate between different message types
+                
                 const isCurrentUser = idx % 2 === 1;
                 const isImportant = idx % 3 === 0;
                 const hasImage = idx % 4 === 0;
@@ -20,7 +20,6 @@ const GroupMessageSkeleton = () => {
                             </div>
                         </div>
                         
-                        {/* Sender name and role */}
                         <div className='chat-header mb-1 flex items-center gap-2'>
                             <div className='skeleton h-4 w-16'/>
                             {!isCurrentUser && (
@@ -28,7 +27,6 @@ const GroupMessageSkeleton = () => {
                             )}
                         </div>
                         
-                        {/* Message bubble - different types */}
                         <div className={`chat-bubble bg-transparent p-0 ${
                             isImportant ? 'border-l-4 border-warning' : ''
                         }`}>
@@ -39,7 +37,6 @@ const GroupMessageSkeleton = () => {
                             )}
                         </div>
                         
-                        {/* Message status/time */}
                         <div className='chat-footer'>
                             <div className='skeleton h-3 w-12'/>
                         </div>
