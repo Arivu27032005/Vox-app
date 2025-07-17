@@ -100,7 +100,7 @@ const Sidebar = () => {
             className='btn btn-sm btn-circle btn-ghost hover:bg-base-300'
             title="Switch Chats/Groups"
           >
-            <span className="text-white">Switch <Repeat className="size-3" /></span>
+            <div className="text-white"><Repeat className="size-3" /> Switch</div>
           </button>
         </div>
 
