@@ -5,7 +5,7 @@ const NoChatSelected = () => {
   return (
     <div className='w-full flex flex-1 flex-col items-center justify-center p-16 bg-gradient-to-br from-base-100/50 to-base-200/30'>
         <div className='max-w-md text-center space-y-6 relative'>
-            {/* Decorative elements */}
+            
             <Sparkles className="absolute -top-5 -left-5 text-yellow-400/30 w-8 h-8 animate-pulse" />
             <Sparkles className="absolute -bottom-5 -right-5 text-primary/30 w-8 h-8 animate-pulse delay-300" />
             
