@@ -237,7 +237,7 @@ const ImportantMessageWrapper = ({ messageData }) => {
             })}
           </ul>
 
-          {/* Resubmit button section - restored */}
+          {/* Resubmit button section */}
           <div className="mt-2 flex justify-between">
             {userResponse?.status === "Unable" && !isResubmitting && (
               <button 
