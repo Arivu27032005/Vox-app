@@ -16,7 +16,6 @@ export const useChatStore = create((set, get) => ({
   currentGroupRole: null,
   isGroupsLoading: false,
 
-  // === One-to-One ===
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
@@ -83,7 +82,7 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket?.off("newMessage");
   },
-  // === Group Chat ===
+  
   getGroupMessages: async (groupId) => {
   set({ isMessagesLoading: true });
   try {
@@ -132,17 +131,13 @@ export const useChatStore = create((set, get) => ({
 
   const groupId = selectedGroup._id;
 
-  // Join the group room
   socket.emit("joinGroups", [groupId]);
 
-  // ✅ Clear old listeners (prevent duplicates)
   socket.off("groupMessage");
   socket.off("groupMemberRoleUpdated");
   socket.off("importantMessageRespondersUpdated");
 
-  // 🔔 Listen for new group messages
   socket.on("groupMessage", (newMessage) => {
-    // Only add message if it's for the current group
     if (String(newMessage.group) === String(groupId)) {
       set((state) => ({
         messages: [...state.messages, newMessage],
@@ -150,7 +145,6 @@ export const useChatStore = create((set, get) => ({
     }
   });
 
-  // 🔁 Role updates (e.g., Assistant, Officer)
   socket.on("groupMemberRoleUpdated", ({ groupId: updatedGroupId, updatedMember }) => {
     if (String(updatedGroupId) !== String(groupId)) return;
 
@@ -170,7 +164,6 @@ export const useChatStore = create((set, get) => ({
     });
   });
 
-  // 🔁 Responder updates for important messages
   socket.on("importantMessageRespondersUpdated", ({ messageId, responders }) => {
     set((state) => ({
       messages: state.messages.map((msg) =>
@@ -179,7 +172,6 @@ export const useChatStore = create((set, get) => ({
     }));
   });
 
-  // (Optional) If you're tracking ignoredBy or other updates:
   socket.off("importantMessageIgnored");
   socket.on("importantMessageIgnored", ({ messageId, userId }) => {
     set((state) => ({
@@ -210,7 +202,6 @@ export const useChatStore = create((set, get) => ({
 
       toast.success("Response recorded");
 
-      // Emit optional socket event
       const socket = useAuthStore.getState().socket;
       if (socket?.connected) {
         socket.emit("importantResponseSubmitted", {
@@ -220,7 +211,6 @@ export const useChatStore = create((set, get) => ({
         });
       }
 
-      // Update local state
       const updatedMessages = messages.map((msg) =>
         msg._id === messageId
           ? {
@@ -252,14 +242,13 @@ export const useChatStore = create((set, get) => ({
     );
     return data;
   } catch (err) {
-    console.error("❌ Ignore failed:", err);
+    console.error("Ignore failed:", err);
     throw err;
   }
   },
 
   getShouldBlockChat: ({ authUserId, selectedGroup, messages }) => {
   try {
-    // Find the latest StrictReply message
     const strictMsg = [...messages]
       .reverse()
       .find((m) => m.messageType === "StrictReply");
@@ -291,14 +280,14 @@ export const useChatStore = create((set, get) => ({
     return false;
   }
   },
-  // === Group Meta ===
+  
   setSelectedGroup: (group) => {
   if (!group) {
     set({
       selectedGroup: null,
       currentGroupRole: null,
       groupMembers: [],
-      messages: [], // Clear messages when group is deselected
+      messages: [], 
       selectedUser: null ,
     });
     return;
@@ -405,7 +394,7 @@ export const useChatStore = create((set, get) => ({
     toast.error(err.response?.data?.message || "Demotion failed");
   }
   },
-  // === Setters ===
+  
   setSelectedUser: (user) => {
   if (!user) {
     set({ selectedUser: null });
@@ -413,8 +402,8 @@ export const useChatStore = create((set, get) => ({
   }
   set({
     selectedUser: user,
-    selectedGroup: null, // Clear selected group when selecting user
-    messages: [] // Clear previous messages
+    selectedGroup: null, 
+    messages: [] 
   });
   }, 
   setGroups: (groups) => set({ groups }),
