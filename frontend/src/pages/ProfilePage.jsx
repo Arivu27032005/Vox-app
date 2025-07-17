@@ -47,7 +47,7 @@ const ProfilePage = () => {
   }
 
   const handleClose = () => {
-    navigate(-1) // Go back to previous page
+    navigate(-1)
   }
 
   return (
