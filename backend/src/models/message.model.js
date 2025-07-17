@@ -23,8 +23,6 @@ const messageSchema=new mongoose.Schema(
             type:String,
         },
 
-        // Important message handling
-
         messageType:{
             type:String,
             enum:["Normal", "ShouldReply", "StrictReply"],
