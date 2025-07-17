@@ -174,37 +174,36 @@ const Sidebar = () => {
             ) : (
               filteredUsers.map((user) => (
                 <button
-  key={user._id}
-  onClick={() => {
-    setSelectedUser(user);
-    setIsMobileSidebarOpen(false);
-  }}
-  className={`w-full p-2 lg:p-3 flex items-center gap-2 lg:gap-3 hover:bg-base-300 transition-colors rounded-lg border border-transparent hover:border-base-300 ${
-    selectedUser?._id === user._id ? "bg-base-300 border-base-300" : ""
-  }`}
->
-  <div className='relative flex items-center gap-2'>
-    <img
-      src={user.profilePic || "/avatar.jpg"}
-      alt={user.name}
-      className='size-8 lg:size-10 object-cover rounded-full border border-base-200'
-    />
-    {/* Hide fullname on desktop */}
-    <span className='font-medium text-sm truncate max-w-[120px] lg:hidden'>
-      {user.fullname}
-    </span>
-    {onlineUsers.includes(user._id) && (
-      <span className='absolute bottom-0 right-0 lg:right-auto lg:left-9 size-2 lg:size-3 bg-green-500 rounded-full ring-1 lg:ring-2 ring-base-100' />
-    )}
-  </div>
-  {/* Desktop name and status */}
-  <div className='hidden lg:flex flex-col text-left min-w-0'>
-    <div className='font-medium truncate'>{user.fullname}</div>
-    <div className='text-xs lg:text-sm text-zinc-400'>
-      {onlineUsers.includes(user._id) ? "Online" : "Offline"}
-    </div>
-  </div>
-</button>
+                  key={user._id}
+                  onClick={() => {
+                  setSelectedUser(user);
+                  setIsMobileSidebarOpen(false);
+                  }}
+                  className={`w-full p-2 lg:p-3 flex items-center gap-2 lg:gap-3 hover:bg-base-300 transition-colors rounded-lg border border-transparent hover:border-base-300 ${
+                  selectedUser?._id === user._id ? "bg-base-300 border-base-300" : ""
+                  }`}
+                >
+               <div className='relative flex items-center gap-2'>
+               <img
+               src={user.profilePic || "/avatar.jpg"}
+               alt={user.name}
+               className='size-8 lg:size-10 object-cover rounded-full border border-base-200'
+               />
+              <span className='font-medium text-sm truncate max-w-[120px] lg:hidden'>
+              {user.fullname}
+              </span>
+              {onlineUsers.includes(user._id) && (
+             <span className='absolute bottom-0 right-0 lg:right-auto lg:left-9 size-2 lg:size-3 bg-green-500 rounded-full ring-1 lg:ring-2 ring-base-100' />
+            )}
+       </div>
+     {/* Desktop name and status */}
+        <div className='hidden lg:flex flex-col text-left min-w-0'>
+             <div className='font-medium truncate'>{user.fullname}</div>
+                <div className='text-xs lg:text-sm text-zinc-400'>
+                  {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+                 </div>
+                </div>
+               </button>
               ))
             )}
           </>
@@ -241,7 +240,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Create Group Modal */}
+      {/* Create Group */}
       {showCreateGroupModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-base-100 rounded-lg p-4 lg:p-6 w-[90%] max-w-md border-2 border-base-300 shadow-lg">
