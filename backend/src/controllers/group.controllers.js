@@ -51,15 +51,13 @@ export const setGroupIdentity = async (req, res) => {
     const group = await Group.findById(groupId);
     if (!group) return res.status(404).json({ message: "Group not found" });
 
-    // Check uniqueness of userId in the group
     const isDuplicate = group.members.some(
       (m) => m.userId?.toLowerCase() === userId.toLowerCase() && m.user.toString() !== currentUserId.toString()
     );
     if (isDuplicate) {
       return res.status(400).json({ message: "User ID already taken in this group" });
     }
-
-    // Update member entry
+    
     const member = group.members.find((m) => m.user.toString() === currentUserId.toString());
     if (!member) return res.status(403).json({ message: "You are not part of this group" });
 
@@ -125,7 +123,6 @@ export const promoteMember = async (req, res) => {
     targetMember.role = newRole;
     await group.save();
 
-    // ✅ Emit real-time update after saving
     req.app.get("io").to(groupId).emit("groupMemberRoleUpdated", {
       groupId,
       updatedMember: {
@@ -159,16 +156,13 @@ export const demoteMember = async (req, res) => {
     const targetMember = group.members.find(
       m => String(m.user) === String(targetUserId)
     );
-
-    // Permission checks
+    
     if (currentRole === "Leader") {
-      // Leader can demote Assistants and Officers
       if (!["Assistant", "Officer"].includes(targetMember.role)) {
         return res.status(403).json({ message: "Leader can only demote Assistants and Officers" });
       }
     }
     else if (currentRole === "Assistant") {
-      // Assistant can only demote Officers
       if (targetMember.role !== "Officer") {
         return res.status(403).json({ message: "Assistant can only demote Officers" });
       }
@@ -177,11 +171,9 @@ export const demoteMember = async (req, res) => {
       return res.status(403).json({ message: "You don't have permission to demote" });
     }
 
-    // Perform demotion
     targetMember.role = "Member";
     await group.save();
 
-    // Emit real-time update
     req.app.get("io").to(groupId).emit("groupMemberRoleUpdated", {
       groupId,
       updatedMember: {
@@ -209,12 +201,10 @@ export const addMemberToGroup = async (req, res) => {
       (m) => m.user.toString() === currentUserId.toString()
     );
     
-    // NEW: Only Leaders/Assistants/Officers can add members
     if (!currentUserEntry || !['Leader', 'Assistant', 'Officer'].includes(currentUserEntry.role)) {
       return res.status(403).json({ message: "You are not able to add members" });
     }
 
-    // Existing checks remain unchanged
     const alreadyInGroup = group.members.some(
       (m) => m.user.toString() === newMember.user
     );
@@ -222,7 +212,6 @@ export const addMemberToGroup = async (req, res) => {
       return res.status(400).json({ message: "User already in group" });
     }
 
-    // Original member addition logic
     group.members.push({
       user: newMember.user,
       displayName: "",
@@ -324,7 +313,7 @@ export const getGroupById = async (req, res) => {
     res.status(500).json({ message: "Failed to get group details" });
   }
 };
-// ... existing imports ...
+
 export const getGroupMessages = async (req, res) => {
   try {
     const groupId = req.params.groupId;
@@ -338,13 +327,12 @@ export const getGroupMessages = async (req, res) => {
     );
     if (!member) return res.status(403).json({ message: "Not a group member" });
 
-    // FIX: Changed from Message to GroupMessage
     const rawMessages = await GroupMessage.find({
       group: groupId,
       createdAt: { $gte: member.joinedAt || new Date(0) },
     })
       .sort({ createdAt: 1 })
-      .populate("sender", "fullname profilePic"); // Use fullname instead of displayName
+      .populate("sender", "fullname profilePic");
 
     const messages = rawMessages.map((msg) => {
       const member = group.members.find(
@@ -358,7 +346,6 @@ export const getGroupMessages = async (req, res) => {
         sender: {
           _id: msg.sender._id,
           profilePic: msg.sender.profilePic,
-          // Use sender's fullname as fallback
           displayName: member?.displayName || msg.sender.fullname || "Member",
         },
         messageType: msg.messageType || "Normal",
@@ -376,7 +363,7 @@ export const getGroupMessages = async (req, res) => {
     res.status(500).json({ message: "Server error while fetching messages" });
   }
 };
-// ... other controller functions ...
+
 export const sendGroupMessage = async (req, res) => {
   try {
     const { content, messageType, strictScope, image } = req.body;
@@ -389,13 +376,11 @@ export const sendGroupMessage = async (req, res) => {
       });
     }
 
-    // 1. Verify group exists
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
 
-    // 2. Check membership
     const isMember = group.members.some(
       (m) => m.user.toString() === senderId.toString()
     );
@@ -405,7 +390,6 @@ export const sendGroupMessage = async (req, res) => {
         .json({ message: "You are not a member of this group" });
     }
 
-    // 3. Check pending strict replies
     const strictMessages = await Message.find({
       group: groupId,
       messageType: "StrictReply",
@@ -433,7 +417,6 @@ export const sendGroupMessage = async (req, res) => {
       }
     }
 
-    // 4. Normalize and validate message type
     const finalType =
       messageType === "StrictReply"
         ? "StrictReply"
@@ -448,7 +431,6 @@ export const sendGroupMessage = async (req, res) => {
           : "MembersOnly"
         : "None";
 
-    // 5. Create message in GroupMessage schema
     const newMessage = await GroupMessage.create({
       sender: senderId,
       group: groupId,
@@ -459,7 +441,6 @@ export const sendGroupMessage = async (req, res) => {
       responders: [],
     });
 
-    // 6. Get display name and prepare frontend-ready object
     const sender = await User.findById(senderId).select("fullname profilePic");
 
     const senderEntry = group.members.find(
@@ -482,10 +463,8 @@ export const sendGroupMessage = async (req, res) => {
       responders: [],
     };
 
-    // 7. Emit via socket (optional)
     req.io?.to(`group_${groupId}`).emit("groupMessage", populatedMessage);
 
-    // 8. Respond
     res.status(201).json(populatedMessage);
   } catch (error) {
     console.error("Send Group Message Error:", error);
@@ -507,18 +486,15 @@ export const respondToImportantMessage = async (req, res) => {
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
     }
-
-    // Check if already responded
+    
     const existingIndex = message.responders.findIndex(
       (r) => r.user.toString() === userId.toString()
     );
 
     if (existingIndex !== -1) {
-      // 🔄 Update existing response
       message.responders[existingIndex].status = status;
       message.responders[existingIndex].infoMessage = infoMessage;
     } else {
-      // ➕ Add new response
       message.responders.push({
         user: userId,
         status,
@@ -528,10 +504,8 @@ export const respondToImportantMessage = async (req, res) => {
 
     await message.save();
 
-    // Fetch full user details to return (optional enhancement)
     await message.populate("responders.user", "fullname userId");
 
-    // 🔄 Emit real-time updated responders
     req.app.get("io")
       .to(`group_${message.group}`)
       .emit("importantMessageRespondersUpdated", {
@@ -565,7 +539,7 @@ export const ignoreImportantMessage = async (req, res) => {
     );
 
     if (!alreadyIgnored) {
-      message.ignoredBy.push(userId); // push string or ObjectId, mongoose will handle it
+      message.ignoredBy.push(userId);
       await message.save();
     }
 
