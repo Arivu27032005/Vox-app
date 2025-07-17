@@ -69,7 +69,7 @@ const MessageInput = () => {
       )}
       <form onSubmit={handleSendMessage} className='flex items-center gap-2'>
         <div className='flex-1 flex gap-2'>
-          {/* Image upload button - now always visible */}
+        
           <button
             type="button"
             className={`btn btn-circle btn-sm ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
