@@ -15,10 +15,9 @@ const io = new Server(server, {
 app.set("io", io);
 const userSocketMap = {};
 
-// 1. Add socket rate limiter (NEW)
 const socketLimiter = new RateLimiterMemory({
-  points: 30, // 30 events
-  duration: 60, // per 60 seconds
+  points: 30, 
+  duration: 60, 
 });
 
 export function getReceiverSocketId(userId) {
@@ -26,18 +25,16 @@ export function getReceiverSocketId(userId) {
 }
 
 io.on("connection", (socket) => {
-  console.log("✅ A user connected:", socket.id);
+  console.log("A user connected:", socket.id);
 
   const userId = socket.handshake.query.userId;
   if (userId) {
     userSocketMap[userId] = socket.id;
   }
 
-  // 2. Apply rate limiting to socket events (NEW)
   socket.onAny(async (event, ...args) => {
     try {
-      await socketLimiter.consume(socket.id); // Limit per socket
-      // ALL YOUR EXISTING LOGIC REMAINS BELOW
+      await socketLimiter.consume(socket.id); 
       if (event === 'joinGroups') {
         const groupIds = args[0];
         groupIds.forEach((id) => {
@@ -47,8 +44,6 @@ io.on("connection", (socket) => {
         });
       }
       
-      // Keep all other existing event handling
-      // ...
     } catch (rejRes) {
       socket.emit('error', 'Too many requests - please slow down');
       console.log(`Rate limit exceeded for socket ${socket.id}`);
@@ -58,7 +53,7 @@ io.on("connection", (socket) => {
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("disconnect", () => {
-    console.log("❌ A user disconnected:", socket.id);
+    console.log("A user disconnected:", socket.id);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
